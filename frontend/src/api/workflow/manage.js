@@ -3,7 +3,7 @@ import request from '@/utils/request'
 // 获取用户节点列表
 export function getUserNodeList(data) {
   return request({
-    url: '/api/workflow/manage/getUserNodeList',
+    url: '/api/manage/getUserNodeList',
     method: 'post',
     data
   })
@@ -12,7 +12,7 @@ export function getUserNodeList(data) {
 // 获取SFTP文件列表
 export function getSftpList(data) {
   return request({
-    url: '/api/workflow/manage/getSftpList',
+    url: '/api/manage/getSftpList',
     method: 'post',
     data
   })
@@ -21,7 +21,7 @@ export function getSftpList(data) {
 // SFTP上传文件
 export function sftpUpload(data, formData) {
   return request({
-    url: '/api/workflow/manage/sftpUpload',
+    url: '/api/manage/sftpUpload',
     method: 'post',
     data: formData,
     params: data,
@@ -34,7 +34,7 @@ export function sftpUpload(data, formData) {
 // SFTP下载文件
 export function sftpDownload(data) {
   return request({
-    url: '/api/workflow/manage/sftpDownload',
+    url: '/api/manage/sftpDownload',
     method: 'post',
     data,
     responseType: 'blob'
@@ -44,7 +44,7 @@ export function sftpDownload(data) {
 // 查询实例回放列表
 export function queryInstanceReplayList(data) {
   return request({
-    url: '/api/workflow/manage/queryInstanceReplayList',
+    url: '/api/manage/queryInstanceReplayList',
     method: 'post',
     data
   })

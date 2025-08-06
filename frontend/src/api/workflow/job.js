@@ -3,7 +3,7 @@ import request from '@/utils/request'
 // 查询实例环境
 export function queryInstanceEnv(data) {
   return request({
-    url: '/api/workflow/job/queryInstanceEnv',
+    url: '/api/job/queryInstanceEnv',
     method: 'post',
     data
   })
@@ -12,7 +12,7 @@ export function queryInstanceEnv(data) {
 // 查询实例产品
 export function queryInstanceProduct(data) {
   return request({
-    url: '/api/workflow/job/queryInstanceProduct',
+    url: '/api/job/queryInstanceProduct',
     method: 'post',
     data
   })
@@ -21,7 +21,7 @@ export function queryInstanceProduct(data) {
 // 查询Zeus标签
 export function queryZeusTag(data) {
   return request({
-    url: '/api/workflow/job/queryZeusTag',
+    url: '/api/job/queryZeusTag',
     method: 'post',
     data
   })
@@ -30,7 +30,7 @@ export function queryZeusTag(data) {
 // 查询实例用户名
 export function queryInstanceUsername(data) {
   return request({
-    url: '/api/workflow/job/queryInstanceUsername',
+    url: '/api/job/queryInstanceUsername',
     method: 'post',
     data
   })
