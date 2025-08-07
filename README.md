@@ -94,16 +94,7 @@ cd backend
 pnpm dev
 ```
 
-3. 构建生产版本
-```bash
-# 前端
-cd frontend
-pnpm build
-
-# 后端
-cd backend
-pnpm start
-```
+访问 http://127.0.0.1:8015
 
 ## 许可证
 
@@ -195,16 +186,7 @@ cd backend
 pnpm dev
 ```
 
-3. Build for Production
-```bash
-# Frontend
-cd frontend
-pnpm build
-
-# Backend
-cd backend
-pnpm start
-```
+visit http://127.0.0.1:8015
 
 ## License
 
