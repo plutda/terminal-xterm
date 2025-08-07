@@ -9,10 +9,15 @@ class TerminalService {
     // 创建模拟终端
     const terminal = {
       currentCommand: '', // 存储当前正在输入的命令
+      ws: null, // 每个终端实例独立的 WebSocket 连接
       write: (data) => {
         // 模拟终端输出
-        if (this.ws && this.ws.readyState === this.ws.OPEN) {
-          this.ws.send(data)
+        if (terminal.ws && terminal.ws.readyState === terminal.ws.OPEN) {
+          terminal.ws.send(JSON.stringify({
+            type: 'output',
+            content: data,
+            terminalId: terminal.id
+          }))
         }
       },
       resize: (cols, rows) => {
@@ -29,12 +34,19 @@ class TerminalService {
   }
 
   handleConnection(ws, terminal) {
-    this.ws = ws
+    // 为终端设置 WebSocket 连接
+    terminal.ws = ws
+    terminal.id = terminal.id || Math.random().toString(36).substr(2, 9)
 
     // 客户端数据处理
     ws.on('message', message => {
       try {
         const data = JSON.parse(message)
+        // 检查消息是否属于此终端
+        if (data.terminalId && data.terminalId !== terminal.id) {
+          return // 忽略不属于此终端的消息
+        }
+        
         switch (data.type) {
           case 1: // 调整终端大小
             terminal.resize(data.cols, data.rows)
@@ -43,7 +55,10 @@ class TerminalService {
             this.handleInput(terminal, data.msg)
             break
           case 3: // 心跳检测
-            ws.send('pong')
+            ws.send(JSON.stringify({
+              type: 'pong',
+              terminalId: terminal.id
+            }))
             break
         }
       } catch (err) {
@@ -100,15 +115,15 @@ class TerminalService {
     
     // 模拟一些基本命令
     if (command === 'ls') {
-      return 'Documents  Downloads  Pictures  Videos\r\n'
+      return '\x1b[34mDocuments\x1b[0m  \x1b[34mDownloads\x1b[0m  \x1b[34mPictures\x1b[0m  \x1b[34mVideos\x1b[0m\r\n'
     }
     
     if (command === 'pwd') {
-      return `${os.homedir()}\r\n`
+      return `\x1b[32m${os.homedir()}\x1b[0m\r\n`
     }
     
     if (command === 'date') {
-      return `${new Date().toString()}\r\n`
+      return `\x1b[33m${new Date().toString()}\x1b[0m\r\n`
     }
     
     if (command === 'clear' || command === 'cls') {
@@ -116,22 +131,22 @@ class TerminalService {
     }
     
     if (command.startsWith('echo ')) {
-      return `${command.substring(5)}\r\n`
+      return `\x1b[36m${command.substring(5)}\x1b[0m\r\n`
     }
 
     if (command === 'help') {
-      return `Available commands:
-  ls          List files and directories
-  pwd         Print working directory
-  date        Show current date and time
-  clear/cls   Clear the screen
-  echo [text] Display text
-  help        Show this help message
+      return `\x1b[1;33mAvailable commands:\x1b[0m
+  \x1b[32mls\x1b[0m          List files and directories
+  \x1b[32mpwd\x1b[0m         Print working directory
+  \x1b[32mdate\x1b[0m        Show current date and time
+  \x1b[32mclear/cls\x1b[0m   Clear the screen
+  \x1b[32mecho [text]\x1b[0m Display text
+  \x1b[32mhelp\x1b[0m        Show this help message
 \r\n`
     }
     
     // 默认输出
-    return `${command}: command not found\r\nType 'help' for available commands\r\n`
+    return `\x1b[31m${command}: command not found\x1b[0m\r\n\x1b[33mType 'help' for available commands\x1b[0m\r\n`
   }
 }
 

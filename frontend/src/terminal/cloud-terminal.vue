@@ -192,12 +192,11 @@
 <script setup>
 import { ref, computed, nextTick, onMounted, provide, defineProps } from 'vue'
 import { ElMessage } from 'element-plus'
-import { SplitHorizontal, SplitVertical } from '@/components/icons'
 import HTerminal from './h-terminal.vue'
 import TerminalPanel from './terminal-panel.vue'
 import { Timer, Star, Brush, Fold, Expand, Delete, Monitor, Close, Document, ArrowDown, Folder } from '@element-plus/icons-vue'
 import FileManager from './file-manager.vue'
-import { queryInstanceReplayList } from '@/api/workflow/manage'
+import { queryInstanceReplayList } from '@/api'
 import { terminalThemes, getThemeById } from './terminal-themes'
 import { terminalManager } from './terminal-manager'
 
@@ -216,7 +215,7 @@ const isToolbarCollapsed = ref(true)
 const historyList = ref([])
 const favoriteList = ref([])
 const activeTab = ref('history')
-const currentThemeId = ref(localStorage.getItem('terminal-theme-id') || 'solarized-light')
+const currentThemeId = ref(localStorage.getItem('terminal-theme-id') || 'dark')
 const currentPage = ref(1)
 const pageSize = ref(10)
 const hasMore = ref(true)
@@ -1330,23 +1329,17 @@ defineExpose({
   border-bottom: none;
 }
 
-:deep(.el-tabs__item) {
-  color: v-bind('`${currentTheme.foreground}99`') !important;
-  
-  &.is-active {
-    color: v-bind('currentTheme.foreground') !important;
+// 统一的主题样式
+:deep {
+  .el-tabs__item, .el-button {
+    color: v-bind('`${currentTheme.foreground}99`');
+    
+    &.is-active, &:hover {
+      color: v-bind('currentTheme.foreground');
+    }
   }
 
-  &:hover:not(.is-active) {
-    color: v-bind('currentTheme.foreground') !important;
-  }
-}
-
-:deep(.el-button) {
-  color: v-bind('currentTheme.foreground');
-  
-  &:hover {
-    color: v-bind('currentTheme.foreground');
+  .el-button:hover {
     opacity: 0.8;
   }
 }

@@ -4,7 +4,7 @@ import { ElMessage } from 'element-plus'
 // 创建axios实例
 const service = axios.create({
   baseURL: '', // API的base_url
-  timeout: 30000 // 请求超时时间
+  timeout: 80250 // 请求超时时间
 })
 
 // request拦截器
@@ -25,7 +25,7 @@ service.interceptors.response.use(
     if (response.config.responseType === 'blob') {
       return response
     }
-    if (res.code !== 0) {
+    if (res.code !== 200) {
       ElMessage({
         message: res.msg || '请求失败',
         type: 'error',

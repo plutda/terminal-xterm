@@ -173,28 +173,19 @@ defineExpose({
   }
 }
 
-:deep(.xterm-viewport) {
-  width: 100% !important;
-  background-color: v-bind('theme.background') !important;
-}
+// 统一的xterm背景色样式
+:deep {
+  .xterm-viewport,
+  .xterm-decoration-overview-ruler,
+  .xterm-viewport > div,
+  .xterm-dom-renderer-owner-1,
+  .xterm-rows {
+    background-color: v-bind('theme.background') !important;
+  }
 
-:deep(.xterm-screen) {
-  width: 100% !important;
-}
-
-:deep(.xterm-decoration-overview-ruler) {
-  background-color: v-bind('theme.background') !important;
-}
-
-:deep(.xterm-viewport > div) {
-  background-color: v-bind('theme.background') !important;
-}
-
-:deep(.xterm-dom-renderer-owner-1) {
-  background-color: v-bind('theme.background') !important;
-}
-
-:deep(.xterm-rows) {
-  background-color: v-bind('theme.background') !important;
+  .xterm-viewport,
+  .xterm-screen {
+    width: 100% !important;
+  }
 }
 </style>

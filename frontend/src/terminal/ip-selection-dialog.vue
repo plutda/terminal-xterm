@@ -1,8 +1,8 @@
 <template>
-  <el-dialog
+  <el-drawer
     v-model="dialogVisible"
     title="选择服务器"
-    width="50%"
+    size="50%"
     :show-close="true"
     :close-on-click-modal="false"
     :close-on-press-escape="false"
@@ -21,10 +21,8 @@
               <el-form-item label="IP" prop="ips">
                 <el-input
                   v-model="searchModel.ips"
-                  type="textarea"
-                  :rows="3"
                   clearable
-                  placeholder="输入多个ip，请换行"
+                  placeholder="ip"
                 />
               </el-form-item>
             </el-col>
@@ -198,7 +196,7 @@
       @current-change="handleCurrentChange"
     />
 
-  </el-dialog>
+  </el-drawer>
 </template>
 
 <script setup>

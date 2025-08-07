@@ -70,7 +70,7 @@
 <script setup>
 import { ref, defineProps, defineEmits, watch } from 'vue'
 import { ElMessage } from 'element-plus'
-import { getSftpList, sftpUpload, sftpDownload } from '@/api/workflow/manage'
+import { getSftpList, sftpUpload, sftpDownload } from '@/api'
 import { Document, Folder } from '@element-plus/icons-vue'
 
 const props = defineProps({

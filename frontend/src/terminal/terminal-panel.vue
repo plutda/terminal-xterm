@@ -9,8 +9,13 @@
           :style="getPanelStyle(index)"
         >
           <terminal-panel 
-            :panel="child"
+            :panel="{
+              ...child,
+              parent: panel
+            }"
             :theme="theme"
+            :parent-panel="panel"
+            :panel-index="index"
             @split-vertical="childId => $emit('split-vertical', childId, splitConfig)"
             @split-horizontal="childId => $emit('split-horizontal', childId, splitConfig)"
             @close-panel="childId => $emit('close-panel', childId)"
@@ -135,6 +140,14 @@ const props = defineProps({
     type: Object,
     required: true
   },
+  parentPanel: {
+    type: Object,
+    default: null
+  },
+  panelIndex: {
+    type: Number,
+    default: -1
+  },
   theme: {
     type: Object,
     default: () => ({
@@ -183,6 +196,31 @@ const activeTerminalId = computed({
 // 当前活动终端
 const currentTerminal = computed(() => {
   return props.panel.terminals.find(t => t.id === activeTerminalId.value)
+})
+
+// 计算边框样式
+const borderStyle = computed(() => {
+  if (!props.panel.children.length) {
+    // 从当前面板开始向上遍历，找到最近的垂直分屏父面板
+    let currentPanel = props.panel
+    let currentIndex = -1
+
+    while (currentPanel.parent) {
+      const parentPanel = currentPanel.parent
+      currentIndex = parentPanel.children.findIndex(child => child.id === currentPanel.id)
+      
+      if (parentPanel.direction === 'vertical') {
+        // 找到垂直分屏的父面板，根据位置决定边框
+        return {
+          borderLeft: currentIndex === 0 ? null : 'none',
+          borderRight: currentIndex === parentPanel.children.length - 1 ? null : 'none'
+        }
+      }
+      
+      currentPanel = parentPanel
+    }
+  }
+  return {}
 })
 
 // 分屏配置
@@ -568,7 +606,7 @@ watch(() => globalActiveTerminalId.value, (newTerminalId) => {
           position: relative;
           
           &:not(:last-child) {
-            border-right: 1px solid #2e2e2e;
+            border-right: v-bind('`1px solid ${theme.foreground}33`');
           }
         }
       }
@@ -580,9 +618,9 @@ watch(() => globalActiveTerminalId.value, (newTerminalId) => {
           width: 100%;
           position: relative;
           
-          &:not(:last-child) {
-            border-bottom: 1px solid #2e2e2e;
-          }
+          // &:not(:last-child) {
+          //   border-bottom: 1px solid #2e2e2e;
+          // }
         }
       }
     }
@@ -594,38 +632,64 @@ watch(() => globalActiveTerminalId.value, (newTerminalId) => {
     flex: 1;
     overflow: hidden;
     position: relative;
-    border: 1px solid transparent;
+    // border: 1px solid transparent;
     transition: all 0.2s ease;
+    .terminal-tabs {
+      position: relative;
+      z-index: 2;  // 确保标签栏在terminals-container之上
+    }
+    
+    .terminals-container {
+      position: relative;
+      z-index: 1;  // 确保在标签栏之下
+    }
     
           // 当面板中有活动终端时，不再给整个面板添加边框
       &.active-panel {
         box-shadow: v-bind('`0 0 3px ${theme.foreground}1a inset`');
-        .terminals-container {
-          border: v-bind('`1px solid ${theme.foreground}33`');
-          border-top-width: 1px;
-        }
         :deep(.el-tabs__item) {
           &.is-active {
             border: v-bind('`1px solid ${theme.foreground}33`') !important;
             border-bottom: none !important;
-            // margin-bottom: 5px;
-            
-            // 遮挡terminals-container的上边线
-            &::after {
-              content: '';
-              position: absolute;
-              bottom: 0;
-              left: 0;
-              right: 0;
-              height: 1px;
-              background-color: v-bind('theme.background');
+            // margin-bottom: -1px;
+            position: relative;
+            z-index: 2;
+            background-color: v-bind('theme.background');
+          }
+        }
+
+        .terminals-container {
+          position: relative;
+          z-index: 1;
+          margin-top: -2px;
+          border: v-bind('`1px solid ${theme.foreground}33`');
+          border-left: v-bind('borderStyle.borderLeft || `1px solid ${theme.foreground}33`');
+          border-right: v-bind('borderStyle.borderRight || `1px solid ${theme.foreground}33`');
+          // 当面板是垂直分屏的子面板时
+          :deep(.panel-container.vertical) {
+            .panel-wrapper:not(:first-child) & {
+              border-left: none; // 如果不是第一个面板，移除左边框
+            }
+            .panel-wrapper:not(:last-child) & {
+              border-right: none; // 如果不是最后一个面板，移除右边框
+            }
+          }
+
+          // 当面板是水平分屏的子面板时
+          :deep(.panel-container.horizontal) {
+            .panel-wrapper:not(:first-child) & {
+              border-top: none; // 如果不是第一个面板，移除上边框
+            }
+            .panel-wrapper:not(:last-child) & {
+              border-bottom: none; // 如果不是最后一个面板，移除下边框
             }
           }
         }
     }
 
     .terminal-tabs {
-      background: v-bind('`${theme.background === "#ffffff" ? "#f0f0f0" : theme.background === "#1e1e1e" ? "#252526" : theme.background}`');
+      // 使用略微浅色的背景，通过降低不透明度来实现
+      background: v-bind('`${theme.foreground}08`');
       position: relative;
 
       .tabs-container {
@@ -682,24 +746,23 @@ watch(() => globalActiveTerminalId.value, (newTerminalId) => {
             }
           }
 
-          // .el-tabs__nav {
-          //   border: none;
-          // }
+          .el-tabs__nav {
+            border: none;
+          }
 
             .el-tabs__item {
-              position: relative;
               border: none;
+              position: relative;
               background: transparent;
-              // margin-right: 4px;
               padding: 0 18px;
               line-height: 34px;
               color: v-bind('`${theme.foreground}99`');
               transition: all 0.2s;
-              border-radius: 3px 3px 0 0;
+              border-radius: 5px 5px 0 0;
 
               &.is-active {
                 color: v-bind('theme.foreground');
-                background: v-bind('`${theme.foreground}0d`'); // 降低到约5%的不透明度
+                background: v-bind('`${theme.background}`') !important; // 降低到约5%的不透明度
                 font-weight: 500;
               }
 
@@ -765,18 +828,21 @@ watch(() => globalActiveTerminalId.value, (newTerminalId) => {
           .icon-img {
             width: 16px;
             height: 16px;
-            filter: v-bind('`${theme.background.toLowerCase().startsWith("#f") ? "brightness(0)" : "invert(1) brightness(0.8)"}`');
-            opacity: v-bind('`${theme.background.toLowerCase().startsWith("#f") ? "0.8" : "0.85"}`');
+            @mixin icon-theme {
+              filter: v-bind('`${theme.background.toLowerCase().startsWith("#f") ? "brightness(0)" : "invert(1) brightness(0.8)"}`');
+              opacity: v-bind('`${theme.background.toLowerCase().startsWith("#f") ? "0.8" : "0.85"}`');
+            }
+            @include icon-theme;
             transition: all 0.2s;
-          }
 
-          &:hover:not(.disabled) .icon-img {
-            filter: v-bind('`${theme.background.toLowerCase().startsWith("#f") ? "brightness(0)" : "invert(1)"}`');
-            opacity: 1;
-          }
+            :hover:not(.disabled) & {
+              filter: v-bind('`${theme.background.toLowerCase().startsWith("#f") ? "brightness(0)" : "invert(1)"}`');
+              opacity: 1;
+            }
 
-          &.disabled .icon-img {
-            opacity: 0.3;
+            .disabled & {
+              opacity: 0.3;
+            }
           }
         }
       }

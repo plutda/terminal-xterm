@@ -128,7 +128,7 @@ class TerminalManager {
     const cols = terminal.cols || 80
     const rows = terminal.rows || 24
     
-    const url = `ws://${terminalData.ip}:3000?rows=${rows}&cols=${cols}&sys_user=${terminalData.role}`
+    const url = `ws://${terminalData.ip}:8025?rows=${rows}&cols=${cols}&sys_user=${terminalData.role}`
 
     // 关闭旧连接
     if (terminalData.socket) {
@@ -164,7 +164,7 @@ class TerminalManager {
       // 心跳检测
       terminalData.timer = setInterval(() => {
         this.sendData(terminalId, { type: 3, msg: 'ping' })
-      }, 30000)
+      }, 80250)
     }
 
     terminalData.socket.onclose = () => {
@@ -183,8 +183,34 @@ class TerminalManager {
     }
 
     terminalData.socket.onmessage = (e) => {
-      if (terminal) {
-        terminal.write(e.data)
+      try {
+        const data = JSON.parse(e.data)
+        
+        // 处理初始化消息
+        if (data.type === 'init') {
+          terminalData.terminalId = data.terminalId
+          return
+        }
+        
+        // 处理心跳响应
+        if (data.type === 'pong') {
+          return
+        }
+        
+        // 检查消息是否属于此终端
+        if (data.terminalId && data.terminalId !== terminalData.terminalId) {
+          return
+        }
+        
+        // 写入终端内容
+        if (terminal) {
+          terminal.write(data.content || e.data)
+        }
+      } catch (err) {
+        // 如果不是JSON格式，直接写入原始数据
+        if (terminal) {
+          terminal.write(e.data)
+        }
       }
     }
 
@@ -197,7 +223,12 @@ class TerminalManager {
   sendData(terminalId, data) {
     const terminalData = this.terminals.get(terminalId)
     if (terminalData?.socket && terminalData.socket.readyState === WebSocket.OPEN) {
-      terminalData.socket.send(JSON.stringify(data))
+      // 添加终端ID到消息中
+      const message = {
+        ...data,
+        terminalId: terminalData.terminalId
+      }
+      terminalData.socket.send(JSON.stringify(message))
     }
   }
 

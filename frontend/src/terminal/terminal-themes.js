@@ -1,13 +1,4 @@
-interface TerminalTheme {
-  id: string;
-  name: string;
-  background: string;
-  foreground: string;
-  cursor: string;
-  description?: string;
-}
-
-export const terminalThemes: TerminalTheme[] = [
+export const terminalThemes = [
   {
     id: 'dark',
     name: '深色主题',
@@ -50,6 +41,6 @@ export const terminalThemes: TerminalTheme[] = [
   }
 ];
 
-export const getThemeById = (id: string): TerminalTheme => {
+export const getThemeById = (id) => {
   return terminalThemes.find(theme => theme.id === id) || terminalThemes[0];
 }; 
