@@ -12,7 +12,9 @@
 
 一个基于Vue 3和Xterm.js的Web终端Demo，参考一些云服务器厂商的web Terminal，设计了多窗口管理、水平垂直分屏、文件传输和定制主题功能。
 
-## 设计的功能点
+🔗 [预览](https://plutda.github.io/terminal-xterm/) (仅前端界面预览，需要本地启动后端服务才能体验完整功能)
+
+## 设计
 
 ### 1. 终端管理
 - 多终端会话管理
@@ -105,6 +107,8 @@ pnpm dev
 ## English
 
 A Web Terminal Demo based on Vue 3 and Xterm.js, inspired by cloud service providers' web terminals, featuring multi-window management, horizontal/vertical split screen, file transfer, and theme customization.
+
+🔗 [Live Preview](https://plutda.github.io/terminal-xterm/) (Frontend UI preview only, backend service needs to be started locally for full functionality)
 
 ## Features
 
